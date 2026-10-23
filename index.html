@@ -159,4 +159,239 @@
             background: var(--accent-blue);
             color: var(--bg-dark);
             border: none;
-            padding
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            transition: background 0.2s ease;
+            display: none;
+        }
+
+        .next-btn:hover {
+            background: #90e0ef;
+        }
+
+        .result-screen {
+            text-align: center;
+            display: none;
+        }
+
+        .result-screen.active {
+            display: block;
+        }
+
+        .score-display {
+            font-size: 2.5rem;
+            color: var(--accent-gold);
+            margin: 15px 0;
+            font-weight: bold;
+        }
+
+        .restart-btn {
+            background: var(--accent-gold);
+            color: var(--bg-dark);
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+
+        footer {
+            text-align: center;
+            font-size: 0.8rem;
+            color: #6c757d;
+            margin-top: 25px;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="school-badge">🏫 金門縣古城國民小學</div>
+        <h1>🌀 薔琵颱風即時知識測驗</h1>
+        <p class="subtitle">115/10/23 氣象動態與科學小學堂</p>
+        <div class="news-flash">
+            📢 <b>時事快訊：</b> 台東大轉彎宣布停班課，全臺僅金門縣正常上班上課！
+        </div>
+    </header>
+
+    <main class="quiz-container">
+        <!-- 答題進行中畫面 -->
+        <div id="questionScreen">
+            <div class="progress-bar">
+                <span id="questionCount">問題 1 / 5</span>
+                <span id="scoreTracker">得分：0</span>
+            </div>
+            <div class="question-title" id="questionTitle">載入中...</div>
+            <div class="options-list" id="optionsList"></div>
+            <div class="feedback-box" id="feedbackBox"></div>
+            <button class="next-btn" id="nextBtn" onclick="nextQuestion()">下一題 ➔</button>
+        </div>
+
+        <!-- 結算畫面 -->
+        <div class="result-screen" id="resultScreen">
+            <h2>🎉 測驗完成！</h2>
+            <p>你對薔琵颱風與即時氣象的掌握度真棒！</p>
+            <div class="score-display" id="finalScore">5/5</div>
+            <p id="resultComment" style="margin-bottom: 20px; line-height: 1.5;"></p>
+            <button class="restart-btn" onclick="restartQuiz()">重新挑戰 🔄</button>
+        </div>
+    </main>
+
+    <footer>
+        <p>© 115 國立金門縣古城國民小學 | 科技領導與數位教學專區</p>
+    </footer>
+
+    <script>
+        const quizData = [
+            {
+                question: "請問「薔琵」（Champi）颱風名稱是由哪個國家所提供的？",
+                options: ["日本", "寮國 (Lao PDR)", "菲律賓", "越南"],
+                answer: 1,
+                explanation: "根據世界氣象組織（WMO）颱風委員會官方命名表，「薔琵」（Champi）是由寮國所提供的名稱，意指一種芳香的花卉（黃樟花/老撾花）。"
+            },
+            {
+                question: "在 115年 10 月 23 日的氣象警報中，下列關於全台停班課狀況何者正確？",
+                options: [
+                    "全台灣各縣市皆正常上班上課",
+                    "僅金門縣停班停課",
+                    "台東縣宣布停班課，全台僅金門縣正常上班上課",
+                    "全台灣各縣市同步宣布停班停課"
+                ],
+                answer: 2,
+                explanation: "10/23 薔琵颱風逼近，台東縣大轉彎宣布停班課，全台各縣市中僅有金門縣維持正常上班上課，古城國小的小朋友照常到校學習！"
+            },
+            {
+                question: "隨著薔琵颱風接近東南部海面，中央氣象署已將其強度調整為哪一個等級？",
+                options: ["輕度颱風", "中度颱風", "強烈颱風", "熱帶性低氣壓"],
+                answer: 1,
+                explanation: "薔琵颱風在接近過程中受到環境與垂直風切影響，強度已調整減弱為「中度颱風」，但其廣闊的暴風圈與外圍環流仍需嚴加戒備。"
+            },
+            {
+                question: "氣象署發布颱風警報時，常會觀測「雷達回波圖」中的 dBZ 強降雨特徵，請問最強的眼牆雨區通常呈現什麼顏色代表？",
+                options: ["藍色與綠色", "淡黃色", "紅色與深紅色（強對流）", "純白色"],
+                answer: 2,
+                explanation: "在氣象雷達回波圖中，紅色、深紅色甚至紫色通常代表 dBZ 值極高的強降雨與強對流眼牆區，風雨最為劇烈。"
+            },
+            {
+                question: "身為古城國小的小朋友，在正常上班上課的 10/23 颱風天上下學途中，最應該注意什麼？",
+                options: [
+                    "不用帶雨具直接跑步回家",
+                    "留意強陣風與隨時關注學校公告，注意交通安全",
+                    "到海邊觀賞巨大的巨浪與海嘯",
+                    "在戶外空曠處放風箏"
+                ],
+                answer: 1,
+                explanation: "雖然金門維持正常上班課，但颱風外圍仍可能有強陣風與間歇雨勢，上下學途中務必注意安全、聽從師長指導！"
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let isAnswered = false;
+
+        const questionCountEl = document.getElementById('questionCount');
+        const scoreTrackerEl = document.getElementById('scoreTracker');
+        const questionTitleEl = document.getElementById('questionTitle');
+        const optionsListEl = document.getElementById('optionsList');
+        const feedbackBoxEl = document.getElementById('feedbackBox');
+        const nextBtnEl = document.getElementById('nextBtn');
+        const questionScreenEl = document.getElementById('questionScreen');
+        const resultScreenEl = document.getElementById('resultScreen');
+        const finalScoreEl = document.getElementById('finalScore');
+        const resultCommentEl = document.getElementById('resultComment');
+
+        function loadQuestion() {
+            isAnswered = false;
+            feedbackBoxEl.classList.remove('active');
+            nextBtnEl.style.display = 'none';
+
+            const currentQ = quizData[currentQuestionIndex];
+            questionCountEl.innerText = `問題 ${currentQuestionIndex + 1} / ${quizData.length}`;
+            scoreTrackerEl.innerText = `得分：${score}`;
+            questionTitleEl.innerText = currentQ.question;
+
+            optionsListEl.innerHTML = '';
+            currentQ.options.forEach((option, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerText = option;
+                btn.onclick = () => selectOption(index, btn);
+                optionsListEl.appendChild(btn);
+            });
+        }
+
+        function selectOption(selectedIndex, selectedBtn) {
+            if (isAnswered) return;
+            isAnswered = true;
+
+            const currentQ = quizData[currentQuestionIndex];
+            const allBtns = optionsListEl.querySelectorAll('.option-btn');
+
+            allBtns.forEach(btn => btn.disabled = true);
+
+            if (selectedIndex === currentQ.answer) {
+                selectedBtn.classList.add('correct');
+                score += 20;
+                scoreTrackerEl.innerText = `得分：${score}`;
+                feedbackBoxEl.innerHTML = `<b>🎉 答對了！</b><br>${currentQ.explanation}`;
+            } else {
+                selectedBtn.classList.add('incorrect');
+                allBtns[currentQ.answer].classList.add('correct');
+                feedbackBoxEl.innerHTML = `<b>💡 答錯囉！正確答案是：${currentQ.options[currentQ.answer]}</b><br>${currentQ.explanation}`;
+            }
+
+            feedbackBoxEl.classList.add('active');
+            
+            if (currentQuestionIndex < quizData.length - 1) {
+                nextBtnEl.innerText = '下一題 ➔';
+            } else {
+                nextBtnEl.innerText = '查看測驗結果 🏆';
+            }
+            nextBtnEl.style.display = 'block';
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < quizData.length) {
+                loadQuestion();
+            } else {
+                showResult();
+            }
+        }
+
+        function showResult() {
+            questionScreenEl.style.display = 'none';
+            resultScreenEl.classList.add('active');
+            finalScoreEl.innerText = `${score} / 100 分`;
+
+            if (score === 100) {
+                resultCommentEl.innerText = "太神啦！你不僅完美掌握薔琵颱風（寮國提供）的冷知識，對 10/23 氣象時事與古城國小的在地應變也完全精通，是名符其實的防颱小達人！";
+            } else if (score >= 60) {
+                resultCommentEl.innerText = "表現很棒！你已經清楚了解薔琵颱風的由來與 10/23 氣象警報重點，繼續保持對科學與時事的好奇心喔！";
+            } else {
+                resultCommentEl.innerText = "沒關係，多玩幾次測驗、複習一下氣象小知識，你就能成為班上的氣象小專家囉！";
+            }
+
+            if (typeof confetti === 'function' && score >= 60) {
+                confetti({ particleCount: 150, spread: 90, origin: { y: 0.6 } });
+            }
+        }
+
+        function restartQuiz() {
+            currentQuestionIndex = 0;
+            score = 0;
+            resultScreenEl.classList.remove('active');
+            questionScreenEl.style.display = 'block';
+            loadQuestion();
+        }
+
+        window.onload = loadQuestion;
+    </script>
+</body>
+</html>
